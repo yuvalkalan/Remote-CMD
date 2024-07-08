@@ -1,4 +1,12 @@
 from .classes import *
+from threading import Thread
+from queue import Queue
+
+
+def terminal_thread(client: Client):
+    while client.running:
+        command = input('command: ')
+        client.send(protocol.ClientCodes.SEND_COMMAND, command)
 
 
 def main():
@@ -7,6 +15,8 @@ def main():
     client = Client(code, password)
     client.start()
     print('connected!')
+    terminal = Thread(target=terminal_thread, args=[client])
+    terminal.start()
     while client.running:
         while client.have_data():
             key, value = client.receive()
@@ -15,3 +25,4 @@ def main():
                 break
             elif key == protocol.ServerCodes.SEND_RESPONSE:
                 print(value)
+    terminal.join()

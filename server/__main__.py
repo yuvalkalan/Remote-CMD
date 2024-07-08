@@ -27,7 +27,7 @@ def main():
                         log.append(f'incorrect password from {client.address}')
                         ok = False
                 elif key == protocol.ClientCodes.SEND_COMMAND:
-                    pass #TODO
+                    print(value)
         return ok
 
     log.append('start server')
