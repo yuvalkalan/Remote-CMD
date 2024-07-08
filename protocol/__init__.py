@@ -4,19 +4,11 @@ import pickle
 import select
 from multiprocessing import Process, Queue
 from .constants import *
-import rsa
 
 
 class ConnectionProtocol:
     def __init__(self):
         self._socket = None
-        self._public_key, self._private_key = rsa.newkeys(ENC_KEY_SIZE)
-        self._other_public = None
-        self._key = None
-        self._iv = None
-        self._cipher = None
-        self._encryptor = None
-        self._decryptor = None
 
     def _get_length_of_msg(self):
         try:
@@ -28,26 +20,15 @@ class ConnectionProtocol:
             print(f'cant get length! {e}')
             return 0
 
-    def send(self, key, value=None, protocol=PR_AES):
+    def send(self, key, value=None):
         try:
             data = key + pickle.dumps(value)
-            if protocol == PR_RSA:
-                data = rsa.encrypt(data, self._other_public)
-            elif protocol == PR_AES:
-                to_add = len(self._iv) - len(data) % len(self._iv) - 1
-                data = to_add.to_bytes(1, 'little') + b'\x00' * to_add + data
-                data = self._encryptor.update(data) + self._encryptor.finalize()
-                self._encryptor = self._cipher.encryptor()
-            elif protocol == PR_UNENCRYPTED:
-                pass
-            else:
-                raise ValueError
             length = len(data).to_bytes(DATA_LENGTH, 'little')
             self._socket.sendall(length + data)
         except Exception as e:
             print(f'cant send! {e}')
 
-    def receive(self, protocol=PR_AES):
+    def receive(self):
         try:
             length = self._get_length_of_msg()
             if length == 0:
@@ -55,17 +36,6 @@ class ConnectionProtocol:
             data = self._socket.recv(length)
             while len(data) < length:
                 data += self._socket.recv(length - len(data))
-            if protocol == PR_RSA:
-                data = rsa.decrypt(data, self._private_key)
-            elif protocol == PR_AES:
-                data = self._decryptor.update(data) + self._decryptor.finalize()
-                to_remove = data[0]
-                data = data[to_remove + 1:]
-                self._decryptor = self._cipher.decryptor()
-            elif protocol == PR_UNENCRYPTED:
-                pass
-            else:
-                raise ValueError
             key, value = data[:KEY_SIZE], data[KEY_SIZE:length]
             value = pickle.loads(value)
             return key, value
@@ -76,67 +46,6 @@ class ConnectionProtocol:
     def have_data(self):
         r, _, _ = select.select([self._socket], [], [], 0)
         return self._socket in r
-
-
-class BaseProcess:
-    def __init__(self, q_receive: Queue, q_send: Queue):
-        self._q_receive = q_receive
-        self._q_send = q_send
-
-    def have_data(self):
-        return not self._q_receive.empty()
-
-    def receive(self):
-        try:
-            return self._q_receive.get()
-        except Exception as e:
-            print(f'cant receive from process! {e}')
-            return CONN_QUIT, None
-
-    def send(self, key, value=None):
-        try:
-            self._q_send.put((key, value))
-        except Exception as e:
-            print(f'cant send! {e}')
-
-    def get(self, key, value=None):
-        self.send(key, value)
-        key, value = self.receive()
-        return value
-
-
-class ProcessManager(BaseProcess):
-    def __init__(self, target):
-        super(ProcessManager, self).__init__(Queue(), Queue())
-        self._process = Process(target=target, args=(self._q_send, self._q_receive))
-
-    def start(self):
-        self._process.start()
-
-    def join(self):
-        self._process.join()
-
-
-class ProcessHandle(BaseProcess):
-    def __init__(self, q_receive: Queue, q_send: Queue):
-        super(ProcessHandle, self).__init__(q_receive, q_send)
-        self._q_receive = q_receive
-        self._q_send = q_send
-
-
-def resolution(res):
-    return int(res * RES_RATIO), res
-
-
-def get_mouse(pos):
-    x, y = pos
-    w, h = SCREEN_SIZE
-    mouse_ratio = h / CLIENT_RESOLUTION
-    return int(mouse_ratio * x), int(mouse_ratio * y)
-
-
-def to_heb(char):
-    return char + 1264
 
 
 def encode_address(address: Tuple[str, int]) -> str:
