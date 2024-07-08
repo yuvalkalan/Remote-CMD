@@ -1,1 +1,1 @@
-
+SERVER_PASSWORD = 'pass'

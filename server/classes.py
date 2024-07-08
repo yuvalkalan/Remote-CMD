@@ -1,6 +1,5 @@
 import socket
 import time
-from typing import *
 import select
 from pyngrok import ngrok
 import protocol
@@ -15,7 +14,6 @@ class Server:
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.bind(('0.0.0.0', protocol.PORT))
         self._server_socket.listen()
-        self._clients: List[ServerConnection] = []
         self._frame = None
 
     def _create_ngrok_tunnel(self):

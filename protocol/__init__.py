@@ -1,4 +1,5 @@
 import math
+import socket
 from typing import *
 import pickle
 import select
@@ -7,7 +8,7 @@ from .constants import *
 
 class ConnectionProtocol:
     def __init__(self):
-        self._socket = None
+        self._socket: Optional[socket.socket] = None
 
     def _get_length_of_msg(self):
         try:
