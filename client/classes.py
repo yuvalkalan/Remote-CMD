@@ -11,7 +11,6 @@ class Client(protocol.ConnectionProtocol):
         self._password = password
         self._frame = None
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._window_name = str((self._server_ip, self._port))
         self._running = False
 
     @property
@@ -21,10 +20,6 @@ class Client(protocol.ConnectionProtocol):
     @running.setter
     def running(self, other):
         self._running = other
-
-    @property
-    def window_name(self):
-        return self._window_name
 
     def start(self):
         self._socket.connect((self._server_ip, self._port))

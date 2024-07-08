@@ -1,5 +1,6 @@
 from .server import *
 from .client import *
+from enum import auto
 DATA_LENGTH = 4
 PORT = 42069
 KEY_SIZE = 2

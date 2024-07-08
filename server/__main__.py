@@ -30,14 +30,17 @@ def main():
                     pass #TODO
         return ok
 
+    log.append('start server')
     server: Server = Server()
     server.start()
 
     client: ServerConnection = server.accept()
+    log.append(f'connect new client - {client.address}')
     while server.running:
         data_ok = handle_data()
         if not data_ok:
             log.append(f'remove {client.address}! waiting for other connection...')
             client = server.accept()
+            log.append(f'connect new client - {client.address}')
     server.stop()
 
