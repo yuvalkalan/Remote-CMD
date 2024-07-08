@@ -27,13 +27,13 @@ def main():
                         log.append(f'incorrect password from {client.address}')
                         ok = False
                 elif key == protocol.ClientCodes.SEND_COMMAND:
-                    print(value)
+                    print(value)    # TODO
         return ok
 
     log.append('start server')
     server: Server = Server()
     server.start()
-
+    # TODO: add cmd process
     client: ServerConnection = server.accept()
     log.append(f'connect new client - {client.address}')
     while server.running:
