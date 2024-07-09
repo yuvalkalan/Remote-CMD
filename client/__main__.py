@@ -1,8 +1,6 @@
 import time
-
 from .classes import *
 from threading import Thread
-from queue import Queue
 
 
 def terminal_thread(client: Client):
@@ -11,7 +9,7 @@ def terminal_thread(client: Client):
     while client.running:
         while not client.send_mode:
             pass
-        command = input(f'{client.path}: ')
+        command = input(f'{client.path}>')
         client.send(protocol.ClientCodes.SEND_COMMAND, command)
         client.send_mode = False
 

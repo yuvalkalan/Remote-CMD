@@ -6,11 +6,9 @@ from .constants import *
 class Client(protocol.ConnectionProtocol):
     def __init__(self, code, password):
         super(Client, self).__init__()
-        # self._server_ip, self._port = protocol.decode_address(code)
-        # self._server_ip += protocol.NGROK_URL_ENDING
-        # self._password = password
-        self._server_ip, self._port = '127.0.0.1', protocol.PORT
-        self._password = 'pass'
+        self._server_ip, self._port = protocol.decode_address(code)
+        self._server_ip += protocol.NGROK_URL_ENDING
+        self._password = password
         self._frame = None
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._running = False

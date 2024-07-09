@@ -32,7 +32,8 @@ def main():
                 elif key == protocol.ClientCodes.SEND_COMMAND:
                     output = ''
                     if value:
-                        result = subprocess.run(f'cd {client.path} && ' + value + ' && cd', shell=True, capture_output=True, text=True)
+                        command = f'cd {client.path} && ' + value + ' && cd'
+                        result = subprocess.run(command, shell=True, capture_output=True, text=True)
                         if result.stderr:
                             output = result.stderr
                         else:
@@ -52,7 +53,6 @@ def main():
     log.append('start server')
     server: Server = Server()
     server.start()
-    # TODO: add cmd process
     client: ServerConnection = server.accept()
     log.append(f'connect new client - {client.address}')
     while server.running:
