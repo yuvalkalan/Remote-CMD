@@ -1,4 +1,6 @@
+import os.path
 import socket
+import sys
 import time
 import select
 from pyngrok import ngrok
@@ -66,6 +68,7 @@ class ServerConnection(protocol.ConnectionProtocol):
         self._server = server
         self._got_password = False
         self._socket, self._address = sock.accept()
+        self._path = os.path.abspath(os.getcwd())
 
     @property
     def _running(self):
@@ -82,3 +85,12 @@ class ServerConnection(protocol.ConnectionProtocol):
     @got_password.setter
     def got_password(self, value):
         self._got_password = value
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, path):
+        self._path = path
+0

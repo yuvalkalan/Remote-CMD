@@ -1,3 +1,6 @@
+import subprocess
+
+import protocol.ServerCodes
 from .classes import *
 from .constants import *
 
@@ -27,7 +30,23 @@ def main():
                         log.append(f'incorrect password from {client.address}')
                         ok = False
                 elif key == protocol.ClientCodes.SEND_COMMAND:
-                    print(value)    # TODO
+                    output = ''
+                    if value:
+                        result = subprocess.run(f'cd {client.path} && ' + value + ' && cd', shell=True, capture_output=True, text=True)
+                        if result.stderr:
+                            output = result.stderr
+                        else:
+                            result = result.stdout.strip().rsplit('\n', maxsplit=1)
+                            if len(result) == 1:
+                                new_dir = result[0]
+                            else:
+                                output, new_dir = result
+                            # print(f'output = {output}', f'new_dir = {new_dir}', sep='\n')
+                            client.path = new_dir
+                    client.send(protocol.ServerCodes.SEND_RESPONSE, output)
+                    client.send(protocol.ServerCodes.SET_PATH, client.path)
+                elif key == protocol.ClientCodes.GET_PATH:
+                    client.send(protocol.ServerCodes.SET_PATH, client.path)
         return ok
 
     log.append('start server')

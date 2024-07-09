@@ -1,12 +1,19 @@
+import time
+
 from .classes import *
 from threading import Thread
 from queue import Queue
 
 
 def terminal_thread(client: Client):
+    while not client.path:
+        pass
     while client.running:
-        command = input('command: ')
+        while not client.send_mode:
+            pass
+        command = input(f'{client.path}: ')
         client.send(protocol.ClientCodes.SEND_COMMAND, command)
+        client.send_mode = False
 
 
 def main():
@@ -25,4 +32,8 @@ def main():
                 break
             elif key == protocol.ServerCodes.SEND_RESPONSE:
                 print(value)
+            elif key == protocol.ServerCodes.SET_PATH:
+                client.path = value
+                time.sleep(0.1)
+                client.send_mode = True
     terminal.join()
